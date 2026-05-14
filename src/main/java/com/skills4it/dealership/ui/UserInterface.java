@@ -41,7 +41,7 @@ public class UserInterface {
     private void displayHeader() {
         System.out.println();
         System.out.println("=============================================");
-        System.out.println("Welcome to the worst place ever: " + dealership.getName());
+        System.out.println("Welcome to the worst place dealership ever! " + dealership.getName());
         System.out.println(dealership.getAddress() + " | " + dealership.getPhone());
         System.out.println("=============================================");
     }
