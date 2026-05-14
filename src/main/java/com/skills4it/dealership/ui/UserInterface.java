@@ -7,15 +7,21 @@ import com.skills4it.dealership.models.enums.VehicleType;
 import com.skills4it.dealership.ui.enums.MenuOption;
 
 import java.util.List;
-import java.util.Scanner;
+
+import static com.skills4it.dealership.ui.Helper.readDouble;
+import static com.skills4it.dealership.ui.Helper.readInt;
+import static com.skills4it.dealership.ui.Helper.readPositiveDouble;
+import static com.skills4it.dealership.ui.Helper.readPositiveInt;
+import static com.skills4it.dealership.ui.Helper.readRequiredString;
+import static com.skills4it.dealership.ui.Helper.readString;
+import static com.skills4it.dealership.ui.Helper.readYear;
 
 public class UserInterface {
-    private final Scanner scanner;
+
     private final DealershipFileManager fileManager;
     private Dealership dealership;
 
     public UserInterface() {
-        this.scanner = new Scanner(System.in);
         this.fileManager = new DealershipFileManager();
     }
 
@@ -23,12 +29,16 @@ public class UserInterface {
         init();
 
         MenuOption selectedOption;
+
         do {
             displayHeader();
             displayMenu();
+
             int choice = readInt("Choose an option: ");
             selectedOption = MenuOption.fromCode(choice).orElse(null);
+
             handleMenuChoice(selectedOption);
+
         } while (selectedOption != MenuOption.QUIT);
 
         System.out.println("Goodbye!");
@@ -40,22 +50,26 @@ public class UserInterface {
 
     private void displayHeader() {
         System.out.println();
-        System.out.println("=============================================");
-        System.out.println("Welcome to the worst place dealership ever! " + dealership.getName());
-        System.out.println(dealership.getAddress() + " | " + dealership.getPhone());
-        System.out.println("=============================================");
+
+
+        System.out.println(" Phone: " + dealership.getPhone());
+        System.out.println("------------------------------------------------------------");
+        System.out.println(" Manage inventory | Search vehicles | Add & remove cars");
+        System.out.println("============================================================");
     }
 
     private void displayMenu() {
         for (MenuOption option : MenuOption.values()) {
             System.out.printf("%-3d - %s%n", option.getCode(), option.getLabel());
         }
+
         System.out.println();
     }
 
     private void handleMenuChoice(MenuOption option) {
         if (option == null) {
             System.out.println("Invalid option. Please try again.");
+            pause();
             return;
         }
 
@@ -69,41 +83,69 @@ public class UserInterface {
             case LIST_ALL -> processAllVehiclesRequest();
             case ADD_VEHICLE -> processAddVehicleRequest();
             case REMOVE_VEHICLE -> processRemoveVehicleRequest();
-            case QUIT -> { }
+            case QUIT -> {
+                // No action needed. The loop will end.
+            }
         }
     }
 
     private void processGetByPriceRequest() {
-        double minPrice = readDouble("Minimum price: ");
-        double maxPrice = readDouble("Maximum price: ");
+        double minPrice = readPositiveDouble("Minimum price: ");
+        double maxPrice = readPositiveDouble("Maximum price: ");
+
+        if (minPrice > maxPrice) {
+            System.out.println("Minimum price cannot be higher than maximum price.");
+            pause();
+            return;
+        }
+
         displayVehicles(dealership.getVehiclesByPrice(minPrice, maxPrice));
     }
 
     private void processGetByMakeModelRequest() {
         String make = readString("Make, leave empty for any: ");
         String model = readString("Model, leave empty for any: ");
+
         displayVehicles(dealership.getVehiclesByMakeModel(make, model));
     }
 
     private void processGetByYearRequest() {
-        int minYear = readInt("Minimum year: ");
-        int maxYear = readInt("Maximum year: ");
+        int minYear = readYear("Minimum year: ");
+        int maxYear = readYear("Maximum year: ");
+
+        if (minYear > maxYear) {
+            System.out.println("Minimum year cannot be higher than maximum year.");
+            pause();
+            return;
+        }
+
         displayVehicles(dealership.getVehiclesByYear(minYear, maxYear));
     }
 
     private void processGetByColorRequest() {
-        String color = readString("Color: ");
+        String color = readRequiredString("Color: ");
+
         displayVehicles(dealership.getVehiclesByColor(color));
     }
 
     private void processGetByMileageRequest() {
-        int minMileage = readInt("Minimum mileage: ");
-        int maxMileage = readInt("Maximum mileage: ");
+        int minMileage = readPositiveInt("Minimum mileage: ");
+        int maxMileage = readPositiveInt("Maximum mileage: ");
+
+        if (minMileage > maxMileage) {
+            System.out.println("Minimum mileage cannot be higher than maximum mileage.");
+            pause();
+            return;
+        }
+
         displayVehicles(dealership.getVehiclesByMileage(minMileage, maxMileage));
     }
 
     private void processGetByVehicleTypeRequest() {
-        VehicleType vehicleType = readVehicleType("Vehicle type (" + VehicleType.getAllowedValuesText() + "): ");
+        VehicleType vehicleType = readVehicleType(
+                "Vehicle type (" + VehicleType.getAllowedValuesText() + "): "
+        );
+
         displayVehicles(dealership.getVehiclesByType(vehicleType));
     }
 
@@ -112,86 +154,81 @@ public class UserInterface {
     }
 
     private void processAddVehicleRequest() {
+        System.out.println();
         System.out.println("Add a new vehicle");
 
         int vin = readPositiveInt("VIN: ");
+
         if (dealership.findVehicleByVin(vin).isPresent()) {
             System.out.println("A vehicle with this VIN already exists. Vehicle was not added.");
+            pause();
             return;
         }
 
         int year = readYear("Year: ");
         String make = readRequiredString("Make: ");
         String model = readRequiredString("Model: ");
-        VehicleType vehicleType = readVehicleType("Vehicle type (" + VehicleType.getAllowedValuesText() + "): ");
+
+        VehicleType vehicleType = readVehicleType(
+                "Vehicle type (" + VehicleType.getAllowedValuesText() + "): "
+        );
+
         String color = readRequiredString("Color: ");
         int odometer = readPositiveInt("Odometer: ");
         double price = readPositiveDouble("Price: ");
 
-        Vehicle vehicle = new Vehicle(vin, year, make, model, vehicleType, color, odometer, price);
+        Vehicle vehicle = new Vehicle(
+                vin,
+                year,
+                make,
+                model,
+                vehicleType,
+                color,
+                odometer,
+                price
+        );
+
         dealership.addVehicle(vehicle);
         fileManager.saveDealership(dealership);
 
         System.out.println("Vehicle added and inventory saved.");
+        pause();
     }
 
     private void processRemoveVehicleRequest() {
         int vin = readPositiveInt("Enter VIN of vehicle to remove: ");
 
-        dealership.findVehicleByVin(vin).ifPresentOrElse(vehicle -> {
-            System.out.println("Vehicle found:");
-            displayVehicles(List.of(vehicle));
-
-            String confirmation = readString("Remove this vehicle? yes/no: ");
-            if (confirmation.equalsIgnoreCase("yes") || confirmation.equalsIgnoreCase("y")) {
-                dealership.removeVehicleByVin(vin);
-                fileManager.saveDealership(dealership);
-                System.out.println("Vehicle removed and inventory saved.");
-            } else {
-                System.out.println("Remove cancelled.");
-            }
-        }, () -> System.out.println("No vehicle found with VIN " + vin + "."));
+        dealership.findVehicleByVin(vin).ifPresentOrElse(
+                vehicle -> confirmAndRemoveVehicle(vehicle, vin),
+                () -> {
+                    System.out.println("No vehicle found with VIN " + vin + ".");
+                    pause();
+                }
+        );
     }
 
-    private void displayVehicles(List<Vehicle> vehicles) {
-        if (vehicles == null || vehicles.isEmpty()) {
-            System.out.println("No vehicles found.");
-            pause();
-            return;
+    private void confirmAndRemoveVehicle(Vehicle vehicle, int vin) {
+        System.out.println("Vehicle found:");
+        displayVehiclesWithoutPause(List.of(vehicle));
+
+        String confirmation = readString("Remove this vehicle? yes/no: ");
+
+        if (confirmation.equalsIgnoreCase("yes") || confirmation.equalsIgnoreCase("y")) {
+            dealership.removeVehicleByVin(vin);
+            fileManager.saveDealership(dealership);
+
+            System.out.println("Vehicle removed and inventory saved.");
+        } else {
+            System.out.println("Remove cancelled.");
         }
 
-        System.out.println();
-        System.out.printf("%-8s %-6s %-12s %-15s %-8s %-10s %10s %11s%n",
-                "VIN", "YEAR", "MAKE", "MODEL", "TYPE", "COLOR", "ODOMETER", "PRICE");
-        System.out.println("---------------------------------------------------------------------------------------");
-
-        for (Vehicle vehicle : vehicles) {
-            System.out.println(vehicle);
-        }
-
-        System.out.println("---------------------------------------------------------------------------------------");
-        System.out.println("Total vehicles: " + vehicles.size());
         pause();
-    }
-
-    private String readString(String prompt) {
-        System.out.print(prompt);
-        return scanner.nextLine().trim();
-    }
-
-    private String readRequiredString(String prompt) {
-        while (true) {
-            String value = readString(prompt);
-            if (!value.isBlank()) {
-                return value;
-            }
-            System.out.println("This field is required. Please try again.");
-        }
     }
 
     private VehicleType readVehicleType(String prompt) {
         while (true) {
             String input = readRequiredString(prompt);
+
             var vehicleType = VehicleType.fromString(input);
 
             if (vehicleType.isPresent()) {
@@ -202,65 +239,42 @@ public class UserInterface {
         }
     }
 
-    private int readInt(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String input = scanner.nextLine().trim();
-
-            try {
-                return Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a whole number.");
-            }
-        }
+    private void displayVehicles(List<Vehicle> vehicles) {
+        displayVehiclesWithoutPause(vehicles);
+        pause();
     }
 
-    private int readPositiveInt(String prompt) {
-        while (true) {
-            int number = readInt(prompt);
-            if (number >= 0) {
-                return number;
-            }
-            System.out.println("Please enter a positive number.");
+    private void displayVehiclesWithoutPause(List<Vehicle> vehicles) {
+        if (vehicles == null || vehicles.isEmpty()) {
+            System.out.println("No vehicles found.");
+            return;
         }
-    }
 
-    private int readYear(String prompt) {
-        while (true) {
-            int year = readInt(prompt);
-            if (year >= 1886 && year <= 2100) {
-                return year;
-            }
-            System.out.println("Please enter a realistic vehicle year between 1886 and 2100.");
+        System.out.println();
+        System.out.printf(
+                "%-8s %-6s %-12s %-15s %-8s %-10s %10s %11s%n",
+                "VIN",
+                "YEAR",
+                "MAKE",
+                "MODEL",
+                "TYPE",
+                "COLOR",
+                "ODOMETER",
+                "PRICE"
+        );
+
+        System.out.println("---------------------------------------------------------------------------------------");
+
+        for (Vehicle vehicle : vehicles) {
+            System.out.println(vehicle);
         }
-    }
 
-    private double readDouble(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String input = scanner.nextLine().trim();
-
-            try {
-                return Double.parseDouble(input);
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid number, for example 1995.00.");
-            }
-        }
-    }
-
-    private double readPositiveDouble(String prompt) {
-        while (true) {
-            double number = readDouble(prompt);
-            if (number >= 0) {
-                return number;
-            }
-            System.out.println("Please enter a positive number.");
-        }
+        System.out.println("---------------------------------------------------------------------------------------");
+        System.out.println("Total vehicles: " + vehicles.size());
     }
 
     private void pause() {
         System.out.println();
-        System.out.print("Press Enter to continue...");
-        scanner.nextLine();
+        readString("Press Enter to continue...");
     }
 }
