@@ -91,7 +91,7 @@ public class Dealership {
 
     public void addVehicle(Vehicle vehicle) {
         if (findVehicleByVin(vehicle.getVin()).isPresent()) {
-            throw new IllegalArgumentException("A vehicle with VIN " + vehicle.getVin() + " already exists.");
+            throw new IllegalArgumentException("A vehicle w/ VIN " + vehicle.getVin() + " already exists.");
         }
         inventory.add(vehicle);
     }
