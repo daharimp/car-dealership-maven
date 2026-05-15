@@ -101,4 +101,8 @@ public class Helper {
             System.out.println("Please use YYYY-MM-DD format.");
         }
     }
+    public static void pause() {
+        System.out.println();
+        readString("Press Enter to continue...");
+    }
 }
