@@ -8,7 +8,7 @@ public class LeaseContract extends Contract {
     private static final double LEASE_FEE_RATE = 0.07;
     private static final double LEASE_APR = 0.04;
     private static final int LEASE_TERM_MONTHS = 36;
-    private static final int MAX_VEHICLE_AGE_YEARS = 15;
+    private static final int MAX_VEHICLE_AGE_YEARS = 12;
 
     private double expectedEndingValue;
     private double leaseFee;
