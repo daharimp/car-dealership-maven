@@ -1,5 +1,7 @@
 package com.skills4it.dealership.models;
 
+import java.time.LocalDate;
+
 public class SalesContract extends Contract {
 
     private static final double SALES_TAX_RATE = 0.05;
@@ -65,25 +67,22 @@ public class SalesContract extends Contract {
         this.financed = financed;
     }
 
-
-
-
-
-    @Override
-    public double getMonthlyPayment() {
-        if (!financed) return 0;
-        double vehiclePrice = getVehicleSold().getPrice();
-        double apr = vehiclePrice >= PRICE_TIER_THRESHOLD
-                ? LOAN_APR_HIGH_TIER : LOAN_APR_LOW_TIER;
-        int termMonths  = vehiclePrice >= PRICE_TIER_THRESHOLD
-                ? LOAN_TERM_MONTHS_HIGH_TIER : LOAN_TERM_MONTHS_LOW_TIER;
-        // todo: replace with Loans.monthlyPayment(getTotalPrice(), apr, termMonths); after loans class creation
-        return getTotalPrice();
-    }
-
     @Override
     public double getTotalPrice() {
         return getVehicleSold().getPrice() + salesTaxAmount + recordingFee + processingFee;
+    }
+
+    @Override
+    public double getMonthlyPayment() {
+        if (!financed) return 0.0;
+        double vehiclePrice = getVehicleSold().getPrice();
+        double apr = vehiclePrice >= PRICE_TIER_THRESHOLD
+                ? LOAN_APR_HIGH_TIER
+                : LOAN_APR_LOW_TIER;
+        int termMonths = vehiclePrice >= PRICE_TIER_THRESHOLD
+                ? LOAN_TERM_MONTHS_HIGH_TIER
+                : LOAN_TERM_MONTHS_LOW_TIER;
+        return Loans.monthlyPayment(getTotalPrice(), apr, termMonths);
     }
 
     @Override

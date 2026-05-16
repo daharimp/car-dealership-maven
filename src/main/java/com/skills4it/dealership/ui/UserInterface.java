@@ -2,15 +2,16 @@ package com.skills4it.dealership.ui;
 
 import com.skills4it.dealership.data.ContractFileManager;
 import com.skills4it.dealership.data.DealershipFileManager;
-import com.skills4it.dealership.models.Dealership;
-import com.skills4it.dealership.models.Vehicle;
 import com.skills4it.dealership.models.Contract;
+import com.skills4it.dealership.models.Dealership;
 import com.skills4it.dealership.models.LeaseContract;
 import com.skills4it.dealership.models.LeaseEligibilityException;
 import com.skills4it.dealership.models.SalesContract;
+import com.skills4it.dealership.models.Vehicle;
 import com.skills4it.dealership.models.enums.VehicleType;
 import com.skills4it.dealership.ui.enums.MenuOption;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class UserInterface {
@@ -144,11 +145,19 @@ public class UserInterface {
     }
 
     private void processRemoveVehicleRequest() {
+        System.out.println("Remove a vehicle");
+
+        // Show current inventory so the user can read the VIN.
+        System.out.println();
+        System.out.println("Current inventory:");
+        printVehiclesTable(dealership.getAllVehicles());
+        System.out.println();
+
         int vin = Helper.readPositiveInt("Enter VIN of vehicle to remove: ");
 
         dealership.findVehicleByVin(vin).ifPresentOrElse(vehicle -> {
-            System.out.println("Vehicle found:");
-            displayVehicles(List.of(vehicle));
+            System.out.println("Vehicle to remove:");
+            printVehiclesTable(List.of(vehicle));
 
             boolean confirmed = Helper.readYesNo("Remove this vehicle? yes/no: ");
             if (confirmed) {
@@ -164,7 +173,13 @@ public class UserInterface {
     private void processSellLeaseVehicleRequest() {
         System.out.println("Sell or lease a vehicle");
 
-        int vin = Helper.readPositiveInt("VIN of vehicle: ");
+        // Show current inventory so the user can read the VIN.
+        System.out.println();
+        System.out.println("Current inventory:");
+        printVehiclesTable(dealership.getAllVehicles());
+        System.out.println();
+
+        int vin = Helper.readPositiveInt("Enter the VIN of the vehicle: ");
         var vehicleOpt = dealership.findVehicleByVin(vin);
         if (vehicleOpt.isEmpty()) {
             System.out.println("No vehicle found with VIN " + vin + ".");
@@ -172,8 +187,6 @@ public class UserInterface {
             return;
         }
         Vehicle vehicle = vehicleOpt.get();
-        System.out.println("Vehicle found:");
-        displayVehicles(List.of(vehicle));
 
         String contractType = readContractType("Sale or lease? (sale/lease): ");
         String contractDate = Helper.readYyyyMmDdDate("Contract date (YYYYMMDD): ");
@@ -198,15 +211,19 @@ public class UserInterface {
         dealership.removeVehicleByVin(vin);
         fileManager.saveDealership(dealership);
 
-        System.out.printf("Contract recorded. Total: $%,.2f, monthly: $%,.2f%n",
-                contract.getTotalPrice(), contract.getMonthlyPayment());
+        System.out.println();
+        System.out.println("Contract recorded.");
+        System.out.printf("  Total price:     $%,.2f%n", contract.getTotalPrice());
+        System.out.printf("  Monthly payment: $%,.2f%n", contract.getMonthlyPayment());
         Helper.pause();
     }
 
-    private void displayVehicles(List<Vehicle> vehicles) {
+    /**
+     * Print-only table — no pause. Used when more input follows.
+     */
+    private void printVehiclesTable(List<Vehicle> vehicles) {
         if (vehicles == null || vehicles.isEmpty()) {
             System.out.println("No vehicles found.");
-            Helper.pause();
             return;
         }
 
@@ -221,6 +238,13 @@ public class UserInterface {
 
         System.out.println("---------------------------------------------------------------------------------------");
         System.out.println("Total vehicles: " + vehicles.size());
+    }
+
+    /**
+     * Print + pause. Used when this is the end of a flow.
+     */
+    private void displayVehicles(List<Vehicle> vehicles) {
+        printVehiclesTable(vehicles);
         Helper.pause();
     }
 

@@ -8,7 +8,13 @@ final class Loans {
     private Loans() { /* no instances */ }
 
     /**
-     * Calculates the fixed monthly payment for a fully amortized loan.
+     * Calculates the fixed monthly payment for a fully amortized loan
+     * using the standard PMT formula:
+     *
+     *   PMT = P * r * (1 + r)^n / ((1 + r)^n - 1)
+     *
+     * where P is principal, r is the monthly interest rate, n is the
+     * number of monthly payments.
      *
      * @param principal  amount being financed
      * @param annualRate APR as a decimal (e.g. 0.0425 for 4.25%)
@@ -24,4 +30,3 @@ final class Loans {
         return principal * monthlyRate * growth / (growth - 1.0);
     }
 }
-
