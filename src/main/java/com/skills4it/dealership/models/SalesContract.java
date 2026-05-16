@@ -1,7 +1,5 @@
 package com.skills4it.dealership.models;
 
-import java.time.LocalDate;
-
 public class SalesContract extends Contract {
 
     private static final double SALES_TAX_RATE = 0.05;
@@ -20,7 +18,7 @@ public class SalesContract extends Contract {
     private double processingFee;
     private boolean financed;
 
-    public SalesContract(LocalDate contractDate,
+    public SalesContract(String contractDate,
                          String customerName,
                          String customerEmail,
                          Vehicle vehicleSold,

@@ -1,6 +1,5 @@
 package com.skills4it.dealership.models;
 
-import java.time.LocalDate;
 import java.time.Year;
 
 public class LeaseContract extends Contract {
@@ -14,7 +13,7 @@ public class LeaseContract extends Contract {
     private double expectedEndingValue;
     private double leaseFee;
 
-    public LeaseContract(LocalDate contractDate,
+    public LeaseContract(String contractDate,
                          String customerName, String customerEmail,
                          Vehicle vehicleSold) {
         super(contractDate, customerName, customerEmail, vehicleSold);

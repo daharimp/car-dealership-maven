@@ -1,6 +1,5 @@
 package com.skills4it.dealership.models;
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Objects;
@@ -17,9 +16,9 @@ public abstract class Contract {
     private double totalPrice;
     private double monthlyPayment;
 
-    public Contract(LocalDate contractDate, String customerName,
+    public Contract(String contractDate, String customerName,
                     String customerEmail, Vehicle vehicleSold) {
-        this.contractDate = Objects.requireNonNull(contractDate, "contractDate").format(DATE_FORMAT);
+        this.contractDate = Objects.requireNonNull(contractDate, "contractDate");
         this.customerName = Objects.requireNonNull(customerName, "customerName").trim();
         this.customerEmail = Objects.requireNonNull(customerEmail, "customerEmail").trim();
         this.vehicleSold = Objects.requireNonNull(vehicleSold, "vehicleSold");

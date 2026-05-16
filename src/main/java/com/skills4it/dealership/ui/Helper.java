@@ -87,7 +87,7 @@ public class Helper {
         while (true) {
             String value = readRequiredString(prompt).toLowerCase();
             if (value.equals("yes") || value.equals("y")) return true;
-            if (value.equals("no") || value.equals("n")) return false;
+            if (value.equals("no")  || value.equals("n")) return false;
             System.out.println("Please enter yes or no.");
         }
     }
@@ -98,9 +98,10 @@ public class Helper {
             if (value.matches("\\d{8}")) {
                 return value;
             }
-            System.out.println("Please use YYYY-MM-DD format.");
+            System.out.println("Please use 8 digits in YYYYMMDD format, for example 20260514.");
         }
     }
+
     public static void pause() {
         System.out.println();
         readString("Press Enter to continue...");
