@@ -18,13 +18,13 @@ public class LeaseContract extends Contract {
                          String customerName, String customerEmail,
                          Vehicle vehicleSold) {
         super(contractDate, customerName, customerEmail, vehicleSold);
-        requreEligibleForLease(vehicleSold);
+        requireEligibleForLease(vehicleSold);
         double vehiclePrice = vehicleSold.getPrice();
         this.expectedEndingValue = vehiclePrice * EXPECTED_ENDING_VALUE_RATE;
         this.leaseFee = vehiclePrice * LEASE_FEE_RATE;
     }
 
-    private static void requreEligibleForLease(Vehicle vehicle) {
+    private static void requireEligibleForLease(Vehicle vehicle) {
         int currentYear = Year.now().getValue();
         int age = currentYear - vehicle.getYear();
         if (age > MAX_VEHICLE_AGE_YEARS) {
